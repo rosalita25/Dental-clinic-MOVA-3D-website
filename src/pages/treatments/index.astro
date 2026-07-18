@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const treatments = [
+  ['Dental İmplant','Tek veya çoklu diş eksikliklerinde cerrahi ve protetik planlama.'],
+  ['All-on-4 / All-on-6','Tam dişsizlik durumlarında sabit protez seçenekleri.'],
+  ['Zirkonyum Kaplama','Doğal ışık geçirgenliği ve yüksek dayanıklılık.'],
+  ['Lamina Veneer','Minimal aşındırmayla estetik ön bölge restorasyonları.'],
+  ['Dijital Gülüş Tasarımı','Fotoğraf ve dijital ölçülerle kişiye özel estetik plan.'],
+  ['Şeffaf Plak','Dişleri kontrollü biçimde hareket ettiren estetik ortodonti.'],
+  ['Kanal Tedavisi','Enfekte pulpanın temizlenmesi ve dişin korunması.'],
+  ['Diş Beyazlatma','Klinik ortamda kontrollü renk açma uygulaması.'],
+  ['Çocuk Diş Hekimliği','Koruyucu uygulamalar, dolgu ve çocuk dostu takip.'],
+];
+---
+<BaseLayout title="Diş Tedavileri | DentaLoft Kağıthane" description="İmplant, zirkonyum, veneer, şeffaf plak, kanal tedavisi, beyazlatma ve çocuk diş hekimliği seçeneklerini inceleyin.">
+  <section class="section">
+    <div class="container">
+      <span class="eyebrow">Tedaviler</span>
+      <h1 style="font-size:clamp(2.5rem,6vw,5rem)">Her tedavi için ayrı uzmanlık, tek koordineli plan.</h1>
+      <p class="lead">Tanı ve tedavi planı klinik muayene ve gerekli görüntülemelerden sonra kesinleştirilir.</p>
+      <div class="grid grid-3" style="margin-top:38px">
+        {treatments.map(([title,desc],i)=>(
+          <article class="card service-card"><span class="pill">0{i+1}</span><div><h3>{title}</h3><p class="muted">{desc}</p><a href="/contact">Bilgi al →</a></div></article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

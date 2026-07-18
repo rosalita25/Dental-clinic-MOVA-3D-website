@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Randevu ve İletişim | DentaLoft Kağıthane" description="DentaLoft Kağıthane için randevu talebi oluşturun.">
+<section class="section">
+  <div class="container grid grid-2">
+    <div>
+      <span class="eyebrow">İletişim</span>
+      <h1 style="font-size:clamp(2.5rem,6vw,5rem)">Size uygun zamanı birlikte planlayalım.</h1>
+      <p class="lead">Form demo amaçlıdır. Yayına almadan önce WhatsApp, e-posta veya bir form servisine bağlanmalıdır.</p>
+      <div class="card" style="margin-top:28px">
+        <h3>Kağıthane Kliniği</h3>
+        <p class="muted">Future clinic concept — Istanbul, Türkiye.</p>
+        <p><strong>Telefon:</strong> +90 505 808 17 86</p>
+        <p><strong>E-posta:</strong> Dr.Rossalita@gmail.com</p>
+      </div>
+    </div>
+    <form class="card" action="https://formsubmit.co/replace-with-email@example.com" method="POST">
+      <input type="hidden" name="_subject" value="Yeni DentaLoft randevu talebi">
+      <div class="form-grid">
+        <label>Ad Soyad<input name="name" required /></label>
+        <label>Telefon<input name="phone" required /></label>
+      </div>
+      <label style="margin-top:16px">İlgilendiğiniz tedavi
+        <select name="treatment"><option>İmplant</option><option>Gülüş Tasarımı</option><option>Zirkonyum</option><option>Ortodonti</option><option>Diğer</option></select>
+      </label>
+      <label style="margin-top:16px">Mesaj<textarea name="message"></textarea></label>
+      <label style="display:flex;grid-template-columns:auto 1fr;align-items:start;margin-top:16px;font-weight:500">
+        <input type="checkbox" required style="width:auto;margin-top:6px"> KVKK kapsamında iletişim bilgilerimin randevu süreci için işlenmesini kabul ediyorum.
+      </label>
+      <button class="btn btn-primary" style="margin-top:20px;width:100%">Randevu Talebi Gönder</button>
+    </form>
+  </div>
+</section>
+<div class="container" style="padding:18px 0 42px"><small>ترجمه کامل این صفحه در مرحله بعد تکمیل می‌شود.</small></div>
+</BaseLayout>

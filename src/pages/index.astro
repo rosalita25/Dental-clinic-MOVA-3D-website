@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Mova3DHero from '../components/Mova3DHero.astro';
+const services = [
+  ['İmplant Tedavisi','Eksik dişler için kalıcı, estetik ve fonksiyonel çözümler.','I'],
+  ['Gülüş Tasarımı','Dijital planlama ile yüzünüze özel doğal gülüş.','G'],
+  ['Zirkonyum Kaplama','Güçlü, ışık geçirgen ve doğal görünümlü restorasyonlar.','Z'],
+  ['Ortodonti','Şeffaf plak ve modern ortodontik seçenekler.','O'],
+  ['Kanal Tedavisi','Dişi korumaya odaklanan hassas endodontik yaklaşım.','K'],
+  ['Çocuk Diş Hekimliği','Çocuklara güven veren, koruyucu ve nazik bakım.','Ç'],
+];
+---
+<BaseLayout title="MOVA Oral Intelligence | Future Dental Clinic Concept" description="MOVA Oral Intelligence is a future dental clinic concept combining AI-assisted digital dentistry, natural aesthetics, emotional care and separate adult and pediatric experiences.">
+  <Mova3DHero locale="en" />
+
+  <section class="section">
+    <div class="container">
+      <span class="eyebrow">Tedaviler</span>
+      <h2>İhtiyacınıza göre şekillenen kapsamlı diş hekimliği.</h2>
+      <div class="grid grid-3" style="margin-top:32px">
+        {services.map(([title,desc,icon]) => (
+          <article class="card service-card">
+            <div class="icon">{icon}</div>
+            <div><h3>{title}</h3><p class="muted">{desc}</p><a href="/treatments">Detayları gör →</a></div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section band">
+    <div class="container grid grid-2" style="align-items:center">
+      <div>
+        <span class="eyebrow" style="color:#d7bf92">Dijital Gülüş Tasarımı</span>
+        <h2>Tedavi başlamadan önce sonucu birlikte tasarlayın.</h2>
+        <p class="muted">Fotoğraf, dijital tarama ve yüz analizini birleştirerek diş boyutlarını, oranları ve gülüş hattını tedavi öncesinde planlıyoruz.</p>
+      </div>
+      <div class="beforeafter">
+        <div class="before">ÖNCE</div><div class="after">SONRA</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container grid grid-2" style="align-items:center">
+      <div class="card" style="min-height:420px;background:linear-gradient(145deg,#efe7da,#fff);display:grid;place-items:center">
+        <div style="text-align:center"><span class="pill">3D Planlama</span><h2 style="margin-top:18px">Teknoloji, hekim deneyimini güçlendirir.</h2></div>
+      </div>
+      <div>
+        <span class="eyebrow">Neden DentaLoft?</span>
+        <h2>Net bilgi, doğru planlama, gereksiz işlemden uzak yaklaşım.</h2>
+        <p class="lead">Her hasta için aynı reçete yerine, ağız yapısı, estetik beklenti ve uzun dönem sağlık hedeflerini birlikte değerlendiriyoruz.</p>
+        <div class="grid" style="margin-top:24px">
+          <div class="card"><h3>Şeffaf tedavi planı</h3><p class="muted">Süreç, alternatifler ve maliyetler tedavi öncesinde açıklanır.</p></div>
+          <div class="card"><h3>Multidisipliner ekip</h3><p class="muted">İmplant, estetik, ortodonti ve kanal tedavisi koordineli ilerler.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-sm">
+    <div class="container cta">
+      <div><span class="eyebrow" style="color:#d7bf92">İlk Adım</span><h2>Size uygun tedavi yolunu birlikte belirleyelim.</h2><p style="color:rgba(255,255,255,.72)">Formu doldurun, hasta koordinatörümüz sizi arasın.</p></div>
+      <a class="btn btn-light" href="/contact">Randevu Talebi</a>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,503 @@
+---
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { translations, type Locale } from '../i18n/translations';
+interface Props { locale?: Locale; }
+const { locale = 'en' } = Astro.props;
+const t = translations[locale];
+const prefix = locale === 'en' ? '' : `/${locale}`;
+---
+<section class="mova-experience" id="movaExperience">
+  <div class="mova-sticky">
+    <canvas id="movaCanvas" aria-label="Interactive three-dimensional AI tooth"></canvas>
+    <div class="noise"></div>
+    <div class="vignette"></div>
+
+    <header class="hero-nav">
+      <a href={`${prefix}/`} class="hero-brand" aria-label="MOVA home">
+        <span class="brand-mark">M</span>
+        <span><b>MOVA</b><small>ORAL INTELLIGENCE</small></span>
+      </a>
+      <nav>
+        <a href={`${prefix}/about`}>{t.nav.about}</a>
+        <a href={`${prefix}/treatments`}>{t.nav.adults}</a>
+        <a href={`${prefix}/kids`}>{t.nav.kids}</a>
+        <a href={`${prefix}/technology`}>{t.nav.technology}</a>
+      </nav>
+      <div class="nav-tools"><LanguageSwitcher locale={locale} pathname={Astro.url.pathname} /><a class="book" href={`${prefix}/contact`}>{t.nav.book}</a></div>
+    </header>
+
+    <div class="story story-start">
+      <span class="chapter">{t.hero.chapter1}</span>
+      <h1>{t.hero.title1.split("\n")[0]}<br /><em>{t.hero.title1.split("\n")[1]}</em></h1>
+      <p>{t.hero.body1}</p>
+    </div>
+
+    <div class="story story-awake">
+      <span class="chapter">{t.hero.chapter2}</span>
+      <h2>{t.hero.title2.split("\n")[0]}<br />{t.hero.title2.split("\n")[1]}</h2>
+      <p>{t.hero.body2}</p>
+    </div>
+
+    <div class="story story-final">
+      <span class="chapter">{t.hero.chapter3}</span>
+      <h2>{t.hero.title3.split("\n")[0]}<br /><em>{t.hero.title3.split("\n")[1]}</em></h2>
+      <a href={`${prefix}/technology`} class="discover">{t.hero.discover}</a>
+    </div>
+
+    <div class="hud hud-left">
+      <div><span>ENAMEL</span><b id="enamelValue">100%</b></div>
+      <div><span>DIGITAL TWIN</span><b id="twinValue">OFFLINE</b></div>
+      <div><span>AI ANALYSIS</span><b id="aiValue">STANDBY</b></div>
+    </div>
+
+    <div class="hud hud-right">
+      <article><small>AI DIAGNOSIS</small><strong>Precision mapping</strong><i></i></article>
+      <article><small>3D DIGITAL SCAN</small><strong>Live reconstruction</strong><i></i></article>
+      <article><small>HEALTH ANALYSIS</small><strong id="healthValue">00%</strong><i></i></article>
+    </div>
+
+    <div class="scan-label"><span></span> CBCT / AI SCAN ACTIVE</div>
+
+    <div class="scroll-ui">
+      <small>{t.hero.scroll}</small>
+      <div><i></i></div>
+    </div>
+
+    <noscript>
+      <div class="fallback">MOVA Oral Intelligence — advanced digital dentistry.</div>
+    </noscript>
+  </div>
+</section>
+
+<script>
+  import * as THREE from 'three';
+  import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+  import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+  import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+
+  const section = document.querySelector('#movaExperience');
+  const canvas = document.querySelector('#movaCanvas');
+
+  if (section && canvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x02070d, 0.055);
+
+    const camera = new THREE.PerspectiveCamera(32, innerWidth / innerHeight, 0.1, 100);
+    camera.position.set(0, 0.15, 9.3);
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: Math.min(devicePixelRatio, 2) < 2,
+      alpha: true,
+      powerPreference: 'high-performance'
+    });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloom = new UnrealBloomPass(
+      new THREE.Vector2(innerWidth, innerHeight),
+      0.45, 0.55, 0.82
+    );
+    composer.addPass(bloom);
+
+    const world = new THREE.Group();
+    world.position.set(1.25, -0.05, 0);
+    scene.add(world);
+
+    // Cinematic lighting.
+    scene.add(new THREE.HemisphereLight(0xb9eaff, 0x03070d, 1.1));
+    const key = new THREE.DirectionalLight(0xffffff, 4.2);
+    key.position.set(-4, 5, 7);
+    scene.add(key);
+    const rim = new THREE.PointLight(0x00c8ff, 45, 18, 1.8);
+    rim.position.set(4, 1, 4);
+    scene.add(rim);
+    const rootLight = new THREE.PointLight(0x2edcff, 0, 8, 2);
+    rootLight.position.set(0, -1.7, 1.3);
+    world.add(rootLight);
+
+    const enamelMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xf4f7fa,
+      roughness: 0.24,
+      metalness: 0.0,
+      transmission: 0.0,
+      thickness: 1.0,
+      ior: 1.42,
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.18,
+      transparent: true,
+      opacity: 1
+    });
+
+    const innerMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x35d5ff,
+      emissive: 0x0879b6,
+      emissiveIntensity: 0.0,
+      roughness: 0.22,
+      metalness: 0.1,
+      transmission: 0.38,
+      transparent: true,
+      opacity: 0.0
+    });
+
+    const nerveMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff6e8d,
+      transparent: true,
+      opacity: 0.0
+    });
+
+    // A multi-part procedural molar: crown lobes, neck and roots.
+    const tooth = new THREE.Group();
+    tooth.rotation.set(-0.08, -0.18, 0.02);
+    world.add(tooth);
+
+    const crown = new THREE.Group();
+    const crownParts = [
+      [-0.62, 1.02, 0.10, 0.86],
+      [ 0.62, 1.02, 0.10, 0.86],
+      [-0.48, 0.80,-0.52, 0.78],
+      [ 0.48, 0.80,-0.52, 0.78],
+      [ 0.00, 0.63, 0.20, 1.05]
+    ];
+    crownParts.forEach(([x,y,z,s], index) => {
+      const g = new THREE.SphereGeometry(1, 64, 48);
+      g.scale(s * 1.02, s * 0.82, s * 0.92);
+      const m = new THREE.Mesh(g, enamelMaterial);
+      m.position.set(x, y, z);
+      m.scale.y = index === 4 ? 1.18 : 1;
+      crown.add(m);
+    });
+    const neck = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 48), enamelMaterial);
+    neck.scale.set(1.42, 0.84, 1.04);
+    neck.position.y = 0.05;
+    crown.add(neck);
+    tooth.add(crown);
+
+    function rootMesh(x, tilt, scaleX=1) {
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(x, -0.35, 0),
+        new THREE.Vector3(x * 1.05, -1.05, 0.02),
+        new THREE.Vector3(x + tilt * 0.25, -2.0, 0.06),
+        new THREE.Vector3(x + tilt, -2.85, 0.16)
+      ]);
+      const geo = new THREE.TubeGeometry(curve, 80, 0.36 * scaleX, 24, false);
+      return new THREE.Mesh(geo, enamelMaterial);
+    }
+    const roots = new THREE.Group();
+    roots.add(rootMesh(-0.67, -0.32, 1.0));
+    roots.add(rootMesh(0.02, 0.04, 0.86));
+    roots.add(rootMesh(0.70, 0.34, 1.0));
+    tooth.add(roots);
+
+    // Inner digital twin and pulp network.
+    const innerTooth = tooth.clone(true);
+    innerTooth.traverse((obj) => {
+      if (obj.isMesh) {
+        obj.material = innerMaterial;
+        obj.scale.multiplyScalar(0.82);
+      }
+    });
+    innerTooth.position.z = 0.03;
+    tooth.add(innerTooth);
+
+    function makeNerve(x, bend) {
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(x, 0.1, 0.25),
+        new THREE.Vector3(x * .8, -0.7, 0.28),
+        new THREE.Vector3(x + bend * .2, -1.55, 0.3),
+        new THREE.Vector3(x + bend, -2.55, 0.34)
+      ]);
+      return new THREE.Mesh(new THREE.TubeGeometry(curve, 60, 0.07, 12), nerveMaterial);
+    }
+    const nerves = new THREE.Group();
+    nerves.add(makeNerve(-0.62, -0.20));
+    nerves.add(makeNerve(0, 0.03));
+    nerves.add(makeNerve(0.62, 0.22));
+    tooth.add(nerves);
+
+    // Holographic rings.
+    const rings = new THREE.Group();
+    for (let i = 0; i < 7; i++) {
+      const geo = new THREE.TorusGeometry(1.55 + i * 0.14, 0.008 + i * .001, 12, 160);
+      const mat = new THREE.MeshBasicMaterial({
+        color: i % 2 ? 0x43dcff : 0x168dff,
+        transparent: true,
+        opacity: 0
+      });
+      const ring = new THREE.Mesh(geo, mat);
+      ring.rotation.x = Math.PI / 2 + (i - 3) * 0.055;
+      ring.position.y = -1.7 + i * 0.58;
+      ring.scale.x = 1.05 + i * 0.025;
+      rings.add(ring);
+    }
+    world.add(rings);
+
+    // Scanner plane.
+    const scanner = new THREE.Mesh(
+      new THREE.PlaneGeometry(4.8, 0.018),
+      new THREE.MeshBasicMaterial({
+        color: 0x8feaff,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending
+      })
+    );
+    scanner.position.set(0, -2.8, 1.35);
+    world.add(scanner);
+
+    // Particle intelligence cloud.
+    const count = innerWidth < 700 ? 500 : 1100;
+    const positions = new Float32Array(count * 3);
+    const phases = new Float32Array(count);
+    for (let i=0;i<count;i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 2.0 + Math.random() * 3.4;
+      positions[i*3] = Math.cos(angle) * radius;
+      positions[i*3+1] = (Math.random() - .5) * 6.8;
+      positions[i*3+2] = Math.sin(angle) * radius * .45;
+      phases[i] = Math.random() * Math.PI * 2;
+    }
+    const particleGeo = new THREE.BufferGeometry();
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particleMat = new THREE.PointsMaterial({
+      color: 0x52dfff,
+      size: 0.026,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const particles = new THREE.Points(particleGeo, particleMat);
+    world.add(particles);
+
+    // Data arcs / circuit lines.
+    const circuitMaterial = new THREE.LineBasicMaterial({
+      color: 0x54ddff,
+      transparent: true,
+      opacity: 0
+    });
+    const circuits = new THREE.Group();
+    for (let i=0;i<14;i++) {
+      const y = -2.4 + Math.random() * 5.1;
+      const z = .45 + Math.random() * .6;
+      const side = i % 2 ? -1 : 1;
+      const points = [
+        new THREE.Vector3(side * .4, y, z),
+        new THREE.Vector3(side * (1.25 + Math.random()*.45), y + .12, z),
+        new THREE.Vector3(side * (1.8 + Math.random()*.9), y + .12, z)
+      ];
+      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), circuitMaterial);
+      circuits.add(line);
+    }
+    world.add(circuits);
+
+    // Ground hologram.
+    const ground = new THREE.Group();
+    for (let i=0;i<6;i++) {
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(1.0 + i*.38, 1.01 + i*.38, 128),
+        new THREE.MeshBasicMaterial({
+          color: 0x1cbdff,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0,
+          blending: THREE.AdditiveBlending
+        })
+      );
+      ring.rotation.x = -Math.PI/2;
+      ring.position.y = -3.2;
+      ground.add(ring);
+    }
+    world.add(ground);
+
+    const state = { progress: 0 };
+    let targetProgress = 0;
+
+    const clamp = (n, a=0, b=1) => Math.min(b, Math.max(a, n));
+    const range = (p, start, end) => clamp((p-start)/(end-start));
+    const lerp = THREE.MathUtils.lerp;
+
+    const updateFromScroll = () => {
+      const rect = section.getBoundingClientRect();
+      const travel = section.offsetHeight - innerHeight;
+      targetProgress = clamp(-rect.top / travel);
+      document.documentElement.style.setProperty('--mova-progress', targetProgress);
+    };
+
+    const storyStart = document.querySelector('.story-start');
+    const storyAwake = document.querySelector('.story-awake');
+    const storyFinal = document.querySelector('.story-final');
+    const hudLeft = document.querySelector('.hud-left');
+    const hudRight = document.querySelector('.hud-right');
+    const scanLabel = document.querySelector('.scan-label');
+    const enamelValue = document.querySelector('#enamelValue');
+    const twinValue = document.querySelector('#twinValue');
+    const aiValue = document.querySelector('#aiValue');
+    const healthValue = document.querySelector('#healthValue');
+
+    const applyProgress = (p) => {
+      // Camera and object choreography.
+      camera.position.z = lerp(9.3, 6.4, range(p, 0.02, .72));
+      camera.position.x = lerp(0, -.65, range(p, .48, .9));
+      camera.lookAt(world.position.x, world.position.y, 0);
+
+      tooth.rotation.y = lerp(-.18, Math.PI * .38, range(p, .03, .88));
+      tooth.rotation.x = lerp(-.08, .08, range(p, .35, .86));
+      tooth.position.y = Math.sin(performance.now() * .00075) * .065;
+
+      enamelMaterial.transmission = lerp(0, .83, range(p, .17, .54));
+      enamelMaterial.opacity = lerp(1, .48, range(p, .20, .63));
+      enamelMaterial.roughness = lerp(.24, .06, range(p, .18, .55));
+      enamelMaterial.color.setRGB(
+        lerp(.96, .64, range(p,.18,.56)),
+        lerp(.97, .91, range(p,.18,.56)),
+        lerp(.98, 1.0, range(p,.18,.56))
+      );
+
+      const innerReveal = range(p, .23, .57);
+      innerMaterial.opacity = innerReveal * .78;
+      innerMaterial.emissiveIntensity = innerReveal * 2.2;
+      nerveMaterial.opacity = range(p, .31, .57) * .9;
+      rootLight.intensity = range(p, .24, .62) * 34;
+
+      const scanP = range(p, .12, .38);
+      scanner.material.opacity = Math.sin(scanP * Math.PI) * .9;
+      scanner.position.y = lerp(-2.9, 2.4, scanP);
+
+      const techP = range(p, .34, .76);
+      rings.children.forEach((ring, i) => {
+        ring.material.opacity = techP * (.22 + i*.028);
+        ring.rotation.z = performance.now()*.00018*(i%2?1:-1) + i*.22;
+        ring.scale.y = lerp(.25, 1, techP);
+      });
+      ground.children.forEach((ring, i) => {
+        ring.material.opacity = techP * (.15 + i*.025);
+        ring.rotation.z = performance.now()*.00014*(i%2?1:-1);
+      });
+      particleMat.opacity = techP * .75;
+      circuitMaterial.opacity = range(p,.42,.72) * .8;
+      particles.rotation.y = performance.now() * .00008;
+
+      // UI choreography.
+      storyStart.style.opacity = 1 - range(p, .08, .28);
+      storyStart.style.transform = `translateY(${range(p,.08,.28)*-52}px)`;
+      storyAwake.style.opacity = Math.min(range(p,.25,.43), 1-range(p,.52,.68));
+      storyAwake.style.transform = `translateY(${lerp(40,-20,range(p,.25,.68))}px)`;
+      storyFinal.style.opacity = range(p,.68,.88);
+      storyFinal.style.transform = `translateY(${lerp(45,0,range(p,.68,.9))}px)`;
+      hudLeft.style.opacity = range(p,.34,.58);
+      hudRight.style.opacity = range(p,.46,.7);
+      scanLabel.style.opacity = Math.sin(scanP*Math.PI);
+
+      enamelValue.textContent = `${Math.round(100 - range(p,.18,.58)*52)}%`;
+      twinValue.textContent = p > .49 ? 'ONLINE' : p > .28 ? 'SYNCING' : 'OFFLINE';
+      aiValue.textContent = p > .64 ? 'ACTIVE' : p > .38 ? 'ANALYZING' : 'STANDBY';
+      healthValue.textContent = `${Math.round(range(p,.46,.78)*98).toString().padStart(2,'0')}%`;
+    };
+
+    const clock = new THREE.Clock();
+    const animate = () => {
+      state.progress += (targetProgress - state.progress) * .075;
+      applyProgress(state.progress);
+
+      const t = clock.getElapsedTime();
+      tooth.position.y += Math.sin(t*.8)*.012;
+      rim.intensity = 38 + Math.sin(t*1.4)*5;
+
+      composer.render();
+      requestAnimationFrame(animate);
+    };
+
+    const resize = () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
+      renderer.setSize(innerWidth, innerHeight);
+      composer.setSize(innerWidth, innerHeight);
+      bloom.setSize(innerWidth, innerHeight);
+      world.position.x = innerWidth < 850 ? 0 : 1.25;
+    };
+
+    updateFromScroll();
+    resize();
+    addEventListener('scroll', updateFromScroll, { passive:true });
+    addEventListener('resize', resize);
+    animate();
+  }
+</script>
+
+<style>
+  :global(:root){--mova-progress:0}
+  .mova-experience{height:500vh;background:#02070d;color:#f8fbff;position:relative}
+  .mova-sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:#02070d;isolation:isolate}
+  #movaCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .noise{position:absolute;inset:0;pointer-events:none;opacity:.055;mix-blend-mode:screen;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+  .vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 62% 45%,transparent 12%,rgba(1,5,9,.08) 38%,rgba(1,4,8,.82) 100%)}
+  .hero-nav{position:absolute;z-index:20;top:0;left:0;right:0;height:88px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(22px,5vw,80px);border-bottom:1px solid rgba(170,224,255,.12);background:linear-gradient(180deg,rgba(0,3,8,.72),transparent)}
+  .hero-brand{display:flex;align-items:center;gap:12px;color:white}
+  .brand-mark{width:42px;height:42px;border:1px solid #69dfff;border-radius:50%;display:grid;place-items:center;color:#7de6ff;font-family:Georgia,serif;font-size:1.35rem}
+  .hero-brand>span:last-child{display:grid;line-height:1}
+  .hero-brand b{font-family:Georgia,serif;font-size:1.55rem;letter-spacing:.14em}
+  .hero-brand small{font-size:.55rem;letter-spacing:.28em;color:#a8c5d1;margin-top:6px}
+  .hero-nav nav{display:flex;gap:32px}
+  .nav-tools{display:flex;align-items:center;gap:10px}
+  .hero-nav nav a{color:#c6d3da;font-size:.76rem;text-transform:uppercase;letter-spacing:.12em}
+  .book,.discover{border:1px solid rgba(92,205,255,.55);padding:12px 18px;border-radius:7px;color:white;text-transform:uppercase;font-size:.7rem;letter-spacing:.08em;background:rgba(0,115,177,.08);backdrop-filter:blur(12px)}
+  .story{position:absolute;z-index:10;left:clamp(26px,8vw,130px);top:50%;width:min(520px,40vw);transform:translateY(-50%);will-change:transform,opacity}
+  .story:not(.story-start){opacity:0}
+  .chapter{display:block;color:#3fd4ff;font-size:.68rem;letter-spacing:.22em;margin-bottom:18px}
+  .story h1,.story h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;color:#fff;font-size:clamp(2.7rem,5vw,5.4rem);line-height:1.02;letter-spacing:-.04em;margin:0 0 22px}
+  .story h2{font-size:clamp(2.35rem,4.6vw,4.8rem)}
+  .story em{font-weight:400;color:#58d7ff}
+  .story p{color:#abc0ca;max-width:480px;font-size:clamp(.98rem,1.3vw,1.14rem)}
+  .story-final{width:min(680px,50vw)}
+  .discover{display:inline-flex;margin-top:20px}
+  .hud{position:absolute;z-index:12;opacity:0;transition:opacity .05s linear}
+  .hud-left{left:clamp(20px,3vw,55px);bottom:8%;display:grid;gap:11px}
+  .hud-left>div{width:200px;display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(77,205,255,.22);font-size:.62rem;letter-spacing:.12em;color:#80a2b0}
+  .hud-left b{color:#71ddff}
+  .hud-right{right:clamp(20px,5vw,80px);top:21%;display:grid;gap:13px}
+  .hud-right article{position:relative;width:245px;padding:16px 18px;border:1px solid rgba(56,183,244,.32);background:linear-gradient(135deg,rgba(8,36,55,.72),rgba(3,12,20,.52));border-radius:10px;backdrop-filter:blur(15px);box-shadow:inset 0 0 30px rgba(20,170,255,.05),0 14px 40px rgba(0,0,0,.24)}
+  .hud-right small,.hud-right strong{display:block}
+  .hud-right small{font-size:.63rem;letter-spacing:.09em;color:#8ddfff}
+  .hud-right strong{font-size:.78rem;margin-top:5px;color:#e9f8ff}
+  .hud-right i{display:block;margin-top:13px;height:2px;background:linear-gradient(90deg,#37cfff 0 62%,rgba(55,207,255,.12) 62%)}
+  .scan-label{position:absolute;z-index:11;right:8%;bottom:10%;opacity:0;color:#73dfff;font-size:.62rem;letter-spacing:.16em}
+  .scan-label span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#41ddff;box-shadow:0 0 15px #41ddff;margin-right:8px}
+  .scroll-ui{position:absolute;z-index:15;left:50%;bottom:22px;transform:translateX(-50%);text-align:center;color:#7da1af}
+  .scroll-ui small{font-size:.55rem;letter-spacing:.22em}
+  .scroll-ui>div{width:170px;height:2px;margin-top:9px;background:rgba(106,207,255,.13)}
+  .scroll-ui i{display:block;height:100%;width:calc(var(--mova-progress)*100%);background:#50d7ff;box-shadow:0 0 14px #50d7ff}
+  .fallback{position:absolute;inset:0;display:grid;place-items:center;font-size:2rem}
+  :global(html[dir='rtl']) .story{left:auto;right:clamp(26px,8vw,130px);text-align:right}
+  :global(html[dir='rtl']) .hud-left{left:auto;right:clamp(20px,3vw,55px)}
+  :global(html[dir='rtl']) .hud-right{right:auto;left:clamp(20px,5vw,80px)}
+  @media(max-width:900px){
+    .hero-nav nav{display:none}
+    .hero-nav{height:72px;padding-inline:18px}
+    .book{padding:10px 12px;font-size:.58rem}
+    .story{left:22px;right:22px;top:25%;width:auto}
+    .story-final{top:auto;bottom:10%;width:auto}
+    .story h1,.story h2{font-size:clamp(2.1rem,10vw,4rem)}
+    .story p{font-size:.9rem;max-width:80%}
+    .hud-right{right:12px;top:45%;transform:scale(.78);transform-origin:right center}
+    .hud-left{display:none}
+    .vignette{background:linear-gradient(180deg,rgba(0,3,8,.72),transparent 35%,rgba(0,3,8,.5))}
+  }
+  @media(max-width:560px){
+    .hud-right article{width:190px;padding:11px 12px}
+    .hud-right{top:47%}
+    .hero-brand b{font-size:1.15rem}.brand-mark{width:34px;height:34px}
+    .story p{max-width:100%}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .mova-experience{height:100vh}
+    .story-start{opacity:1!important}
+    .story-awake,.story-final,.hud,.scan-label{display:none}
+  }
+</style>
