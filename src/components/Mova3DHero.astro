@@ -1,0 +1,202 @@
+---
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { translations, type Locale } from '../i18n/translations';
+interface Props { locale?: Locale; }
+const { locale = 'en' } = Astro.props;
+const t = translations[locale];
+const prefix = locale === 'en' ? '' : `/${locale}`;
+---
+
+<section class="experience" id="movaExperience" aria-label="MOVA digital dentistry experience">
+  <div class="stage">
+    <canvas id="sequenceCanvas" aria-label="Scroll-controlled anatomical tooth visualization"></canvas>
+    <div class="ambient" aria-hidden="true"></div>
+    <div class="grid" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <header class="nav">
+      <a href={`${prefix}/`} class="brand" aria-label="MOVA home">
+        <span class="mark">M</span>
+        <span><b>MOVA</b><small>ORAL INTELLIGENCE</small></span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href={`${prefix}/about`}>{t.nav.about}</a>
+        <a href={`${prefix}/treatments`}>{t.nav.adults}</a>
+        <a href={`${prefix}/kids`}>{t.nav.kids}</a>
+        <a href={`${prefix}/technology`}>{t.nav.technology}</a>
+      </nav>
+      <div class="tools"><LanguageSwitcher locale={locale} pathname={Astro.url.pathname} /><a class="book" href={`${prefix}/contact`}>{t.nav.book}</a></div>
+    </header>
+
+    <div class="chapter chapter-one">
+      <span>{t.hero.chapter1}</span>
+      <h1>{t.hero.title1.split('\n')[0]}<br /><em>{t.hero.title1.split('\n')[1]}</em></h1>
+      <p>{t.hero.body1}</p>
+    </div>
+    <div class="chapter chapter-two">
+      <span>{t.hero.chapter2}</span>
+      <h2>{t.hero.title2.split('\n')[0]}<br /><em>{t.hero.title2.split('\n')[1]}</em></h2>
+      <p>{t.hero.body2}</p>
+    </div>
+    <div class="chapter chapter-three">
+      <span>{t.hero.chapter3}</span>
+      <h2>{t.hero.title3.split('\n')[0]}<br /><em>{t.hero.title3.split('\n')[1]}</em></h2>
+      <a class="discover" href={`${prefix}/technology`}>{t.hero.discover}<i>↗</i></a>
+    </div>
+
+    <div class="diagnostics diagnostics-left" aria-hidden="true">
+      <small>LIVE DIGITAL TWIN</small><b id="status">SYSTEM READY</b>
+      <div><i id="diagnosticBar"></i></div>
+      <dl><dt>ENAMEL</dt><dd id="enamel">100%</dd><dt>PULP MAPPING</dt><dd id="pulp">STANDBY</dd></dl>
+    </div>
+    <div class="diagnostics diagnostics-right" aria-hidden="true">
+      <small>MOVA / AI-01</small><strong id="analysis">ANALYSIS 00%</strong>
+      <div class="pulse"></div>
+    </div>
+    <div class="scanline" aria-hidden="true"></div>
+    <div class="loader" id="loader"><span></span><small>INITIALIZING DIGITAL TWIN</small></div>
+    <div class="progress"><small>{t.hero.scroll}</small><div><i></i></div><b id="frameCounter">001 / 100</b></div>
+  </div>
+</section>
+
+<script>
+  const section = document.querySelector('#movaExperience');
+  const canvas = document.querySelector('#sequenceCanvas');
+  const ctx = canvas?.getContext('2d', { alpha: false, desynchronized: true });
+  const total = 100;
+  const images = new Array(total);
+  let loaded = 0, target = 0, current = 0, raf = 0;
+
+  const clamp = (n, a = 0, b = 1) => Math.min(b, Math.max(a, n));
+  const range = (p, a, b) => clamp((p - a) / (b - a));
+  const setOpacity = (el, value, y = 0) => {
+    if (!el) return;
+    el.style.opacity = String(clamp(value));
+    el.style.transform = `translate3d(0,${y}px,0)`;
+  };
+
+  const resize = () => {
+    if (!canvas || !ctx) return;
+    const dpr = Math.min(devicePixelRatio || 1, 1.5);
+    canvas.width = Math.round(innerWidth * dpr);
+    canvas.height = Math.round(innerHeight * dpr);
+    canvas.style.width = `${innerWidth}px`;
+    canvas.style.height = `${innerHeight}px`;
+    draw(Math.round(current));
+  };
+
+  const draw = (index) => {
+    if (!canvas || !ctx) return;
+    const img = images[clamp(index, 0, total - 1)];
+    if (!img?.complete || !img.naturalWidth) return;
+    const cw = canvas.width, ch = canvas.height;
+    const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+    const w = img.naturalWidth * scale, h = img.naturalHeight * scale;
+    const mobileShift = innerWidth < 760 ? 0.5 : 0.57;
+    ctx.fillStyle = '#02070d'; ctx.fillRect(0, 0, cw, ch);
+    ctx.drawImage(img, (cw - w) * mobileShift, (ch - h) * .5, w, h);
+  };
+
+  const updateUI = (p) => {
+    document.documentElement.style.setProperty('--mova-progress', String(p));
+    document.documentElement.style.setProperty('--scan-y', `${8 + range(p,.26,.68) * 78}%`);
+    setOpacity(document.querySelector('.chapter-one'), 1 - range(p,.10,.27), -range(p,.10,.27)*32);
+    setOpacity(document.querySelector('.chapter-two'), Math.min(range(p,.28,.42), 1-range(p,.57,.69)), 28-range(p,.28,.69)*46);
+    setOpacity(document.querySelector('.chapter-three'), range(p,.72,.88), 30-range(p,.72,.88)*30);
+    setOpacity(document.querySelector('.diagnostics-left'), range(p,.34,.52));
+    setOpacity(document.querySelector('.diagnostics-right'), range(p,.48,.67));
+    document.querySelector('.scanline')?.style.setProperty('opacity', String(Math.sin(range(p,.22,.72)*Math.PI)*.8));
+    const percent = Math.round(p * 100);
+    const frame = Math.min(total, Math.floor(p*(total-1))+1);
+    const analysis = document.querySelector('#analysis');
+    const enamel = document.querySelector('#enamel');
+    const pulp = document.querySelector('#pulp');
+    const status = document.querySelector('#status');
+    const counter = document.querySelector('#frameCounter');
+    const bar = document.querySelector('#diagnosticBar');
+    if (analysis) analysis.textContent = `ANALYSIS ${String(percent).padStart(2,'0')}%`;
+    if (enamel) enamel.textContent = `${Math.round(100-range(p,.25,.65)*53)}%`;
+    if (pulp) pulp.textContent = p > .62 ? 'COMPLETE' : p > .38 ? 'MAPPING' : 'STANDBY';
+    if (status) status.textContent = p > .70 ? 'INTELLIGENCE ACTIVE' : p > .28 ? 'SCANNING ANATOMY' : 'SYSTEM READY';
+    if (counter) counter.textContent = `${String(frame).padStart(3,'0')} / 100`;
+    if (bar) bar.style.width = `${percent}%`;
+  };
+
+  const tick = () => {
+    current += (target - current) * .14;
+    if (Math.abs(target-current) < .02) current = target;
+    draw(Math.round(current));
+    if (current !== target) raf = requestAnimationFrame(tick); else raf = 0;
+  };
+
+  const onScroll = () => {
+    if (!section) return;
+    const travel = section.offsetHeight - innerHeight;
+    const p = clamp(-section.getBoundingClientRect().top / travel);
+    target = p * (total - 1);
+    updateUI(p);
+    if (!raf) raf = requestAnimationFrame(tick);
+  };
+
+  const loadFrame = (i, priority = false) => new Promise((resolve) => {
+    const img = new Image();
+    img.decoding = 'async';
+    if (priority) img.fetchPriority = 'high';
+    img.onload = () => {
+      images[i] = img; loaded++;
+      if (i === 0) { resize(); document.querySelector('#loader')?.classList.add('done'); }
+      resolve(true);
+    };
+    const filename = `mova-tooth-${String(i).padStart(3,'0')}.webp`;
+    const sources = [`/sequence/${filename}`, `/public/sequence/${filename}`];
+    let sourceIndex = 0;
+    img.onerror = () => {
+      sourceIndex++;
+      if (sourceIndex < sources.length) img.src = sources[sourceIndex];
+      else resolve(false);
+    };
+    img.src = sources[0];
+  });
+
+  const boot = async () => {
+    await loadFrame(0, true);
+    await Promise.all([1,2,3,4,5,10,20,30,40,50,60,70,80,90,99].map(i => loadFrame(i)));
+    const remaining = Array.from({length:total},(_,i)=>i).filter(i => !images[i]);
+    for (let i=0; i<remaining.length; i+=8) await Promise.all(remaining.slice(i,i+8).map(n=>loadFrame(n)));
+  };
+
+  if (canvas && ctx) {
+    boot(); resize(); onScroll();
+    addEventListener('scroll', onScroll, {passive:true});
+    addEventListener('resize', resize, {passive:true});
+  }
+</script>
+
+<style>
+  :global(:root){--mova-progress:0;--scan-y:8%}
+  .experience{height:560vh;position:relative;background:#02070d;color:#f6fbff}
+  .stage{position:sticky;top:0;height:100svh;overflow:hidden;background:#02070d;isolation:isolate}
+  #sequenceCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;filter:saturate(1.03) contrast(1.04)}
+  .ambient{position:absolute;inset:0;background:radial-gradient(circle at 65% 48%,rgba(25,188,255,.10),transparent 38%);mix-blend-mode:screen;pointer-events:none}
+  .grid{position:absolute;inset:0;opacity:.12;background-image:linear-gradient(rgba(99,213,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(99,213,255,.08) 1px,transparent 1px);background-size:70px 70px;mask-image:linear-gradient(90deg,#000,transparent 45%);pointer-events:none}
+  .vignette{position:absolute;inset:0;background:linear-gradient(90deg,rgba(1,5,10,.96) 0%,rgba(1,5,10,.73) 27%,transparent 58%,rgba(1,5,10,.12)),linear-gradient(180deg,rgba(1,4,9,.45),transparent 30%,rgba(1,4,9,.55));pointer-events:none}
+  .nav{position:absolute;z-index:20;top:0;left:0;right:0;height:88px;padding:0 clamp(22px,5vw,78px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(143,222,255,.14);background:linear-gradient(180deg,rgba(1,5,10,.8),transparent)}
+  .brand{display:flex;align-items:center;gap:12px;color:#fff}.brand>span:last-child{display:grid;line-height:1}.brand b{font-family:Georgia,serif;font-size:1.45rem;letter-spacing:.18em}.brand small{font-size:.5rem;letter-spacing:.3em;color:#a9cbd8;margin-top:7px}
+  .mark{width:43px;height:43px;border:1px solid rgba(95,218,255,.75);border-radius:50%;display:grid;place-items:center;color:#7ce6ff;font-family:Georgia,serif;font-size:1.35rem;box-shadow:inset 0 0 20px rgba(42,196,255,.1),0 0 25px rgba(42,196,255,.08)}
+  .nav nav{display:flex;gap:30px}.nav nav a{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:#c1d3db;transition:.25s}.nav nav a:hover{color:#fff}
+  .tools{display:flex;align-items:center;gap:10px}.book,.discover{border:1px solid rgba(91,211,255,.52);border-radius:999px;color:#fff;background:rgba(4,74,107,.15);backdrop-filter:blur(14px);text-transform:uppercase;letter-spacing:.09em;font-size:.65rem}.book{padding:11px 17px}
+  .chapter{position:absolute;z-index:10;left:clamp(28px,7vw,112px);top:50%;width:min(570px,43vw);transform:translateY(-50%);will-change:opacity,transform}.chapter:not(.chapter-one){opacity:0}
+  .chapter>span{display:flex;align-items:center;gap:12px;color:#65ddff;font-size:.64rem;letter-spacing:.25em;margin-bottom:20px}.chapter>span:before{content:"";width:32px;height:1px;background:#65ddff;box-shadow:0 0 8px #65ddff}
+  .chapter h1,.chapter h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:clamp(2.7rem,5vw,5.3rem);line-height:.98;letter-spacing:-.045em;margin:0 0 24px;color:#fff;text-wrap:balance}.chapter h2{font-size:clamp(2.4rem,4.6vw,4.8rem)}.chapter em{font-weight:400;color:#69ddff;text-shadow:0 0 35px rgba(70,207,255,.25)}
+  .chapter p{max-width:500px;color:#aec6d0;font-size:clamp(.92rem,1.2vw,1.08rem);line-height:1.75}.chapter-three{top:auto;bottom:13%;width:min(720px,52vw)}
+  .discover{display:inline-flex;align-items:center;gap:18px;padding:14px 20px;margin-top:12px}.discover i{font-style:normal;font-size:1rem}
+  .diagnostics{position:absolute;z-index:12;opacity:0;color:#bfeeff;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:linear-gradient(135deg,rgba(3,24,38,.78),rgba(2,10,17,.42));border:1px solid rgba(79,203,255,.28);backdrop-filter:blur(14px);box-shadow:inset 0 0 30px rgba(32,177,240,.04);padding:17px 19px}.diagnostics small{font-size:.58rem;letter-spacing:.17em;color:#78dfff}.diagnostics-left{left:4vw;bottom:7%;width:245px}.diagnostics-left b{display:block;font-size:.7rem;letter-spacing:.08em;margin:7px 0 13px}.diagnostics-left>div{height:2px;background:rgba(87,214,255,.13)}.diagnostics-left>div i{display:block;height:100%;width:0;background:#65dcff;box-shadow:0 0 10px #65dcff}.diagnostics dl{display:grid;grid-template-columns:1fr auto;gap:7px;margin:14px 0 0;font-size:.57rem;letter-spacing:.08em}.diagnostics dt{color:#668b9a}.diagnostics dd{margin:0;color:#c5f3ff}.diagnostics-right{right:5vw;top:19%;width:215px}.diagnostics-right strong{display:block;margin-top:7px;font-size:.76rem}.pulse{width:7px;height:7px;border-radius:50%;background:#6ae4ff;box-shadow:0 0 0 0 rgba(106,228,255,.7);position:absolute;right:16px;top:18px;animation:pulse 1.8s infinite}
+  .scanline{position:absolute;z-index:8;left:31%;right:5%;top:var(--scan-y);height:1px;opacity:0;background:linear-gradient(90deg,transparent,#9cecff,transparent);box-shadow:0 0 12px 3px rgba(72,210,255,.38);pointer-events:none}
+  .progress{position:absolute;z-index:15;left:50%;bottom:22px;transform:translateX(-50%);display:grid;grid-template-columns:auto 180px auto;align-items:center;gap:12px;color:#769aa8}.progress small,.progress b{font-size:.51rem;letter-spacing:.18em;white-space:nowrap}.progress b{font-weight:400;color:#8edcf8}.progress>div{height:1px;background:rgba(106,210,255,.17)}.progress i{display:block;height:100%;width:calc(var(--mova-progress)*100%);background:#67dfff;box-shadow:0 0 12px #67dfff}
+  .loader{position:absolute;z-index:30;inset:0;display:grid;place-content:center;justify-items:center;gap:18px;background:#02070d;transition:opacity .7s,visibility .7s}.loader.done{opacity:0;visibility:hidden}.loader span{width:58px;height:58px;border:1px solid rgba(98,220,255,.2);border-top-color:#69e0ff;border-radius:50%;animation:spin 1s linear infinite}.loader small{font-size:.55rem;letter-spacing:.22em;color:#79aaba}
+  @keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(106,228,255,0)}}
+  :global(html[dir='rtl']) .chapter{left:auto;right:clamp(28px,7vw,112px);text-align:right}:global(html[dir='rtl']) .chapter>span{justify-content:flex-start}:global(html[dir='rtl']) .vignette{transform:scaleX(-1)}
+  @media(max-width:900px){.nav{height:72px;padding-inline:18px}.nav nav{display:none}.book{padding:9px 11px;font-size:.55rem}.chapter{left:22px;right:22px;top:24%;width:auto}.chapter-three{top:auto;bottom:12%;width:auto}.chapter h1,.chapter h2{font-size:clamp(2.15rem,10vw,4rem)}.chapter p{max-width:82%;font-size:.86rem}.diagnostics-left{display:none}.diagnostics-right{right:13px;top:43%;transform:scale(.78);transform-origin:right center}.vignette{background:linear-gradient(180deg,rgba(1,5,10,.77) 0%,rgba(1,5,10,.15) 36%,rgba(1,5,10,.45) 100%)}.grid{display:none}.scanline{left:4%;right:4%}}
+  @media(max-width:560px){.brand b{font-size:1.08rem}.brand small{font-size:.42rem}.mark{width:34px;height:34px}.tools :global(.language-switcher){display:none}.chapter p{max-width:100%}.diagnostics-right{top:45%;right:4px}.progress{grid-template-columns:130px auto}.progress small{display:none}.experience{height:500vh}}
+  @media(prefers-reduced-motion:reduce){.experience{height:100svh}.chapter-one{opacity:1!important}.chapter-two,.chapter-three,.diagnostics,.scanline,.progress{display:none}}
+</style>

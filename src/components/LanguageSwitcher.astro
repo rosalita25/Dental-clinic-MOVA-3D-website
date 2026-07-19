@@ -1,0 +1,76 @@
+---
+import { locales, localizedPath, type Locale } from '../i18n/translations';
+
+interface Props {
+  locale: Locale;
+  pathname: string;
+}
+const { locale, pathname } = Astro.props;
+const labels = { en: 'EN', tr: 'TR', fa: 'FA' };
+---
+<div class="language-switcher" data-language-switcher>
+  <button class="language-current" type="button" aria-haspopup="listbox" aria-expanded="false">
+    <span class="globe">◎</span>
+    <span>{labels[locale]}</span>
+    <span class="chevron">⌄</span>
+  </button>
+  <div class="language-menu" role="listbox">
+    {locales.map((code) => (
+      <a
+        href={localizedPath(pathname, code)}
+        role="option"
+        aria-selected={code === locale}
+        class:list={{ active: code === locale }}
+      >
+        <span>{labels[code]}</span>
+        <small>{code === 'en' ? 'English' : code === 'tr' ? 'Türkçe' : 'فارسی'}</small>
+      </a>
+    ))}
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('[data-language-switcher]').forEach((switcher) => {
+    const button = switcher.querySelector('button');
+    const close = () => {
+      switcher.classList.remove('open');
+      button?.setAttribute('aria-expanded', 'false');
+    };
+    button?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const isOpen = switcher.classList.toggle('open');
+      button.setAttribute('aria-expanded', String(isOpen));
+    });
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') close();
+    });
+  });
+</script>
+
+<style>
+.language-switcher{position:relative}
+.language-current{
+  display:flex;align-items:center;gap:7px;padding:9px 11px;
+  color:#e7f8ff;background:rgba(5,22,32,.62);
+  border:1px solid rgba(100,213,255,.28);border-radius:8px;
+  font:700 .68rem/1 system-ui;letter-spacing:.08em;cursor:pointer;
+  backdrop-filter:blur(14px)
+}
+.globe{font-size:1rem;color:#5bdcff}.chevron{opacity:.65}
+.language-menu{
+  position:absolute;top:calc(100% + 10px);right:0;min-width:155px;
+  padding:7px;border:1px solid rgba(94,208,255,.25);border-radius:12px;
+  background:rgba(3,13,21,.94);backdrop-filter:blur(18px);
+  box-shadow:0 20px 50px rgba(0,0,0,.38);
+  opacity:0;visibility:hidden;transform:translateY(-7px);transition:.2s ease
+}
+.language-switcher.open .language-menu{opacity:1;visibility:visible;transform:translateY(0)}
+.language-menu a{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:10px 11px;border-radius:8px;color:#d8e8ee
+}
+.language-menu a:hover,.language-menu a.active{background:rgba(60,202,255,.12);color:#70ddff}
+.language-menu small{font-size:.7rem;color:#7f9aa6}
+:global(html[dir="rtl"]) .language-menu{right:auto;left:0}
+</style>

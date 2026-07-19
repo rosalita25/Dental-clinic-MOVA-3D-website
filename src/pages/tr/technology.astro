@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const tech = [
+ ['AI-assisted imaging','Pattern recognition support for radiographic review.'],
+ ['3D digital scanning','Comfortable impressions and accurate digital models.'],
+ ['CBCT planning','Three-dimensional assessment for complex treatment planning.'],
+ ['Digital smile simulation','Visual communication before aesthetic treatment.'],
+ ['CAD/CAM workflow','Digitally planned restorations and efficient collaboration.'],
+ ['Remote monitoring','Structured follow-up for selected treatment journeys.']
+];
+---
+<BaseLayout title="MOVA Intelligence Lab | Digital Dentistry" description="Explore MOVA’s future technology ecosystem for AI-assisted and digitally planned dentistry.">
+<section class="tech-page">
+ <div class="container">
+  <span class="eyebrow">MOVA INTELLIGENCE LAB</span>
+  <h1>The digital anatomy of better care.</h1>
+  <p class="lead">This portfolio concept presents a planned technology ecosystem. Clinical use must always follow licensed professional judgment and applicable regulation.</p>
+  <div class="grid grid-3" style="margin-top:42px">
+   {tech.map(([name,desc])=><article class="tech-card"><span>AI / 0{tech.indexOf([name,desc])+1}</span><h3>{name}</h3><p>{desc}</p></article>)}
+  </div>
+ </div>
+</section>
+<div class="container" style="padding:18px 0 42px"><small>Bu sayfanın tam çevirisi bir sonraki aşamada tamamlanacaktır.</small></div>
+</BaseLayout>
+<style>
+.tech-page{min-height:100vh;padding:150px 0;background:#030911;color:white}
+.tech-page .lead,.tech-card p{color:#8fa9b5}
+.tech-card{border:1px solid rgba(70,204,255,.22);padding:26px;border-radius:18px;background:linear-gradient(145deg,rgba(16,61,83,.42),rgba(3,12,19,.7))}
+.tech-card span{font-size:.65rem;letter-spacing:.16em;color:#56d5ff}
+</style>
