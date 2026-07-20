@@ -148,7 +148,12 @@ const prefix = locale === 'en' ? '' : `/${locale}`;
       resolve(true);
     };
     const filename = `mova-tooth-${String(i).padStart(3,'0')}.webp`;
-    const sources = [`/sequence/${filename}`, `/public/sequence/${filename}`];
+    const sources = [
+      `/sequence/${filename}`,
+      `/public/sequence/${filename}`,
+      `/sequence/public/sequence/${filename}`,
+      `/sequence/sequence/${filename}`
+    ];
     let sourceIndex = 0;
     img.onerror = () => {
       sourceIndex++;
